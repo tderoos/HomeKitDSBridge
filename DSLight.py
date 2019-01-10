@@ -4,15 +4,18 @@
 from pyhap.accessory import Accessory
 from pyhap.const import CATEGORY_LIGHTBULB
 
-import DSBridge
+import DSInterface
 
 class DSLight(Accessory):
 
     category = CATEGORY_LIGHTBULB
 
-    def __init__(self, bridge: DSBridge, description: dict, *args, **kwargs):
-        super().__init__(driver=bridge.driver, display_name=description['name'], aid=1254514)
-        self._bridge = bridge
+    def __init__(self, driver, interface: DSInterface, description: dict, *args, **kwargs):
+
+        self._ds = interface
+        self._id = description['id']
+
+        super().__init__(driver=driver, display_name=description['name'], aid=abs(hash(self._id)))
 
         serv_light = self.add_preload_service('Lightbulb', chars=['On', 'Brightness'])
 
@@ -26,6 +29,7 @@ class DSLight(Accessory):
 
 
     def set_state(self, value):
+#        print("set_state" + value)
         self.accessory_state = value
         if value:
             self.set_brightness(100)
@@ -34,11 +38,10 @@ class DSLight(Accessory):
 
 
     def set_brightness(self, value):
+#        print("set_brightness" + value)
         self.brightness = value
-        self.set_hue(self.hue)
+        self._ds.set_value(self._id, value)
 
-        _bridge.apply_command("")
-
-
-    _bridge = 0
+    _ds = 0
+    _id = ''
 

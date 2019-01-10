@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 import requests
 import json
 
-from DigitalStrom import DigitalStrom
+from DSInterface import DSInterface
 from DSLight import DSLight
 
 
@@ -22,28 +22,32 @@ class DSBridge(Bridge):
 
         super().__init__(driver, 'DSBridge', *args, **kwargs)
 
-        self._DSInterface = DigitalStrom()
-        self._DSInterface.connect(address, app_token)
+        interface = DSInterface()
+        interface.connect(address, app_token)
 
-        self._init_config()
+        self._init_config(interface)
 
-    def apply_command(self, command, parameters={}) -> bool:
-        if self._session_token != "":
-            parameters["token"] = self._session_token
+    def _init_config(self, interface: DSInterface):
 
-        url = self._base_url + command + '?' + urlencode(parameters)
+        zones = interface.get_zones()
 
-        r = requests.get(url, verify=False)
-        return json.loads(r.text).get("result", {})
+        for zone in zones:
+            self._init_zone(interface, zone)
 
+#        r = interface.get_devices_for_zone('slaapkamer 1')
 
-    def _init_config(self):
-        r = self._DSInterface.getDevicesForZone('slaapkamer 1')
-
-        light = DSLight(self, r[0])
-        self.add_accessory(light)
+ #       light = DSLight(self.driver, interface, r[0])
+  #      self.add_accessory(light)
 
 
+    def _init_zone(self, interface: DSInterface, zone):
+        devices = interface.get_devices_for_zone(zone)
 
-    _DSInterface = ""
-    _session_token = ""
+        for device in devices:
+            self._init_device(interface, device)
+
+
+    def _init_device(self, interface: DSInterface, device:dict):
+        if device['functionID'] == 4369:
+            light = DSLight(self.driver, interface, device)
+            self.add_accessory(light)
