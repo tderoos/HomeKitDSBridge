@@ -45,6 +45,9 @@ class DSInterface:
     def set_value(self, device_id, value):
         self._applycommand('device/setValue', {'dsid': device_id, 'value': value})
 
+    def get_values(self, device_id):
+        return self._applycommand2('device/getOutputValue', {'dsid': device_id})
+
     def _applycommand(self, command, parameters={}):
 #        assert(self._session_token != "")
 
@@ -57,6 +60,20 @@ class DSInterface:
 
         r = requests.get(url, verify=False)
         return json.loads(r.text).get("result", {})
+
+
+    def _applycommand2(self, command, parameters={}):
+        #        assert(self._session_token != "")
+
+        if self._session_token != "":
+            parameters["token"] = self._session_token
+
+        url = self._base_url + command + '?' + urlencode(parameters)
+
+        print(url)
+
+        r = requests.get(url, verify=False)
+        return json.loads(r.text)
 
     _base_url = ""
     _session_token = ""

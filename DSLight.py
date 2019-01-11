@@ -6,6 +6,10 @@ from pyhap.const import CATEGORY_LIGHTBULB
 
 import DSInterface
 
+dimmed = 22
+switched = 16
+
+
 class DSLight(Accessory):
 
     category = CATEGORY_LIGHTBULB
@@ -17,29 +21,37 @@ class DSLight(Accessory):
 
         super().__init__(driver=driver, display_name=description['name'], aid=abs(hash(self._id)))
 
-        serv_light = self.add_preload_service('Lightbulb', chars=['On', 'Brightness'])
+        chars = ['On']
+        if description['outputMode'] == 22:
+            chars.append('Brightness')
+
+        serv_light = self.add_preload_service('Lightbulb', chars=chars)
 
         self.char_on = serv_light.configure_char(
             'On', setter_callback=self.set_state)
-        self.char_on = serv_light.configure_char(
-            'Brightness', setter_callback=self.set_brightness)
+
+        if description['outputMode'] == 22:
+            self.char_on = serv_light.configure_char(
+                'Brightness', setter_callback=self.set_brightness)
+
+#        r = interface.get_values(self._id)
 
         self.accessory_state = 0    # State of the neo light On/Off
         self.brightness = 100       # Brightness value 0 - 100 Homekit API
 
 
     def set_state(self, value):
-#        print("set_state" + value)
         self.accessory_state = value
         if value:
-            self.set_brightness(100)
+            self.set_brightness(self.brightness)
         else:
-            self.set_brightness(0)
+            self._ds.set_value(self._id, 0)
 
 
     def set_brightness(self, value):
-#        print("set_brightness" + value)
         self.brightness = value
+
+        value = int((value * 255) / 100)
         self._ds.set_value(self._id, value)
 
     _ds = 0

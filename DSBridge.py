@@ -48,6 +48,6 @@ class DSBridge(Bridge):
 
 
     def _init_device(self, interface: DSInterface, device:dict):
-        if device['functionID'] == 4369:
+        if device['functionID'] == 4369 and device['outputMode'] != 0:
             light = DSLight(self.driver, interface, device)
             self.add_accessory(light)
