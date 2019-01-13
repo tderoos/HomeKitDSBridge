@@ -32,7 +32,9 @@ class DSBridge(Bridge):
         zones = interface.get_zones()
 
         for zone in zones:
-            self._init_zone(interface, zone)
+            # Zone with ID 0 is a special zone that contains all devices.
+            if zone != 0:# and zone == 5:
+                self._init_zone(interface, zone)
 
 #        r = interface.get_devices_for_zone('slaapkamer 1')
 
