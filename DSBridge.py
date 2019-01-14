@@ -11,6 +11,7 @@ import json
 
 from DSInterface import DSInterface
 from DSLight import DSLight
+from DSPowerMeter import DSPowerMeter
 
 
 class DSBridge(Bridge):
@@ -29,18 +30,13 @@ class DSBridge(Bridge):
 
     def _init_config(self, interface: DSInterface):
 
-        zones = interface.get_zones()
+        power_meter = DSPowerMeter(self.driver, interface)
+        self.add_accessory(power_meter)
 
-        for zone in zones:
+        for zone in interface.get_zones():
             # Zone with ID 0 is a special zone that contains all devices.
             if zone != 0:# and zone == 5:
                 self._init_zone(interface, zone)
-
-#        r = interface.get_devices_for_zone('slaapkamer 1')
-
- #       light = DSLight(self.driver, interface, r[0])
-  #      self.add_accessory(light)
-
 
     def _init_zone(self, interface: DSInterface, zone):
         devices = interface.get_devices_for_zone(zone)

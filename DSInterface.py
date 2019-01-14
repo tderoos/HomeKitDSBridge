@@ -3,6 +3,10 @@ import requests
 import json
 from requests.auth import HTTPBasicAuth
 
+# Requests are currently not secure
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 class DSInterface:
 
     def __init__(self):
@@ -78,19 +82,3 @@ class DSInterface:
     _base_url = ""
     _session_token = ""
     _zones = {}
-
-
-
-if __name__ == "__main__":
-    base_url = u"https://digitalstrom.local:8080/"
-    app_token = "2480ec583abca051318701c17f08989b48773c13f61115dfd1e88123b0d6f631"
-
-    ds = DSInterface()
-    ds.connect(base_url, app_token)
-
-    rooms = ds.getRooms()
-    print(rooms)
-
-    r = ds.getDevicesForZone('slaapkamer 1')
-
-    ds.set_value(r[0]['id'], 0)

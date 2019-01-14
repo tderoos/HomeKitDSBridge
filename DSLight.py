@@ -31,7 +31,6 @@ class DSLight(Accessory):
 
         # Get the current value for the device
         r = interface._applycommand('device/getConfig', {'dsid': self._id, 'class':64, 'index':0})
-        print(r)
         value = r['value']
 
         self.char_on = serv_light.configure_char(
@@ -52,7 +51,6 @@ class DSLight(Accessory):
 
 
     def set_state(self, value):
-#        self.accessory_state = value
         if value:
             self.set_brightness(self.brightness)
         else:
